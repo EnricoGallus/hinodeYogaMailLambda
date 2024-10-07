@@ -1,9 +1,10 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 const sesClient = new SESClient({ region: 'us-east-1' });
-const HINODE_EMAIL = process.env.MAIL_ADDRESS;
+const SENDER_EMAIL = process.env.SENDER_MAIL_ADDRESS;
+const RECEIVER_EMAIL = process.env.RECEIVER_MAIL_ADDRESS;
 
 export const handler = async (inquireData) => {
-    if (!inquireData.fullName || !inquireData.email || !inquireData.message || !inquireData.contactReason) {
+    if (!inquireData.name || !inquireData.email || !inquireData.message || !inquireData.contactType) {
         return {
             statusCode: 400,
             body: JSON.stringify({ message: 'Missing required fields' }),
@@ -13,16 +14,16 @@ export const handler = async (inquireData) => {
     let emailbody = `
         <html>
             <body>
-                <p>Name: ${inquireData.fullName}</p>
+                <p>Name: ${inquireData.name}</p>
                 <p>Email: ${inquireData.email}</p>
                 <p>Message: ${inquireData.message}</p>
             </body>
         </html>`;
-    let emailSubject = "contact form (hinode.enchan.org) " + inquireData.contactReason;
+    let emailSubject = "contact form (hinode.enchan.org) " + inquireData.contactType;
     const params = {
-        Source: HINODE_EMAIL,
+        Source: SENDER_EMAIL,
         Destination: {
-            ToAddresses: [HINODE_EMAIL],
+            ToAddresses: [RECEIVER_EMAIL],
         },
         Message: {
             Subject: {
